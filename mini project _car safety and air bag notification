@@ -1,0 +1,58 @@
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <Servo.h>
+
+// Initialize components
+Servo servoMotor;
+int flexSensorPin = A0;
+int ultrasonicSensorPin = 2;
+int emergencySwitchPin = 3;
+char auth[] = "YourAuthToken";  // Blynk IoT platform token
+
+void setup() {
+  // Set up the necessary components
+  Blynk.begin(auth, "ssid", "password");
+  servoMotor.attach(9);
+  pinMode(flexSensorPin, INPUT);
+  pinMode(ultrasonicSensorPin, INPUT);
+  pinMode(emergencySwitchPin, INPUT);
+}
+
+void loop() {
+  Blynk.run();
+  
+  // Continuously monitor the status of the flex sensor
+  int flexSensorValue = analogRead(flexSensorPin);
+  
+  // If the flex sensor detects airbag deployment
+  if (flexSensorValue > threshold) {
+    // Activate the GPS module to obtain the live location data
+    // Send a notification through the Blynk IoT platform
+    Blynk.notify("Airbag deployed! Check the location.");
+    
+    // Activate the servo motor to unlock the car doors
+    servoMotor.write(90);
+  }
+  
+  // Continuously monitor the ultrasonic sensor to detect the presence of a front barrier
+  int distance = calculateDistance(ultrasonicSensorPin);
+  
+  // Display the calculated distance on the LCD display
+  Blynk.virtualWrite(V1, distance);
+  
+  // Continuously monitor the status of the emergency switch
+  int emergencySwitchStatus = digitalRead(emergencySwitchPin);
+  
+  // If the emergency switch is activated
+  if (emergencySwitchStatus == HIGH) {
+    // Stop sending notifications through the Blynk IoT platform
+    // Display a "No Emergency" message on the IoT dashboard
+    Blynk.virtualWrite(V2, "No Emergency");
+  }
+}
+
+int calculateDistance(int pin) {
+  // Calculate the distance to the front barrier using the ultrasonic sensor
+  // This is a placeholder function, replace with your actual implementation
+  return analogRead(pin);
+}
